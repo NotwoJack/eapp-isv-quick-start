@@ -10,14 +10,47 @@ import com.dingtalk.api.response.OapiServiceGetCorpTokenResponse;
 import com.dingtalk.api.response.OapiUserGetuserinfoResponse;
 import com.config.ApiUrlConstant;
 import com.taobao.api.ApiException;
+
+import com.util.Ntlm;
+import com.util.OlingoSampleApp;
 import com.util.ServiceResult;
+
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.auth.params.AuthPNames;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.AuthPolicy;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.*;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
+import org.apache.olingo.odata2.api.exception.ODataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
 
 /**
  * ISV E应用Quick-Start示例代码
@@ -65,6 +98,127 @@ public class IndexController {
 		ServiceResult serviceResult = ServiceResult.success(resultMap);
 		return serviceResult;
 	}
+
+	@RequestMapping(value = "/readAPI", method = RequestMethod.GET)
+	@ResponseBody
+	public ServiceResult readAPI(@RequestParam(value = "serviceUrl") String serviceUrl) throws IOException, ODataException {
+
+		OlingoSampleApp.readAPI(serviceUrl);
+
+		//返回结果
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("userId","userId");
+		ServiceResult serviceResult = ServiceResult.success(resultMap);
+		return serviceResult;
+	}
+
+	@RequestMapping(value = "/readAPI2", method = RequestMethod.GET)
+	@ResponseBody
+	public ServiceResult readAPI2(@RequestParam(value = "serviceUrl") String serviceUrl) throws IOException, ODataException {
+
+		OlingoSampleApp.readAPI2(serviceUrl);
+
+		//返回结果
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("userId","userId");
+		ServiceResult serviceResult = ServiceResult.success(resultMap);
+		return serviceResult;
+	}
+
+	@RequestMapping(value = "/readAPI3", method = RequestMethod.GET)
+	@ResponseBody
+	public ServiceResult readAPI3(@RequestParam(value = "serviceUrl") String serviceUrl) throws IOException, ODataException {
+
+		Ntlm.test(serviceUrl);
+
+		//返回结果
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("userId","userId");
+		ServiceResult serviceResult = ServiceResult.success(resultMap);
+		return serviceResult;
+	}
+
+	@RequestMapping(value = "/testNTLMConnection", method = RequestMethod.GET)
+	@ResponseBody
+	public void testNTLMConnection(@RequestParam(value = "serviceUrl") String serviceUrl) throws Exception {
+		// Method 1 : authentication in URL
+//		jcifs.Config.registerSmbURLHandler();
+//		URL urlRequest = new URL("http://rajyj.edu.cn%5Cjk:raedu123@http://172.100.250.61/Citrix/Monitor/OData/v2/Data/Machines/");
+
+		// or Method 2 : authentication via System.setProperty()
+		jcifs.Config.setProperty("http.auth.ntlm.domain", "rajyj.edu.cn");
+		jcifs.Config.setProperty("jcifs.smb.client.domain", "rajyj.edu.cn");
+		jcifs.Config.setProperty("jcifs.smb.client.username", "jk");
+		jcifs.Config.setProperty("jcifs.smb.client.password", "raedu123");
+		jcifs.Config.setProperty("jcifs.netbios.hostname", "172.100.250.61");
+		jcifs.Config.setProperty("java.protocol.handler.pkgs", "jcifs");
+		 URL urlRequest = new URL(serviceUrl);
+
+		HttpURLConnection conn = (HttpURLConnection) urlRequest.openConnection();
+
+		StringBuilder response = new StringBuilder();
+
+		try {
+			InputStream stream = conn.getInputStream();
+			BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+
+			String str = "";
+			while ((str = in.readLine()) != null) {
+				response.append(str);
+			}
+			in.close();
+
+			System.out.println(response);
+		} catch(IOException err) {
+			System.out.println(err);
+		} finally {
+			Map<String, String> msgResponse = new HashMap<String, String>();
+
+			for (int i = 0;; i++) {
+				String headerName = conn.getHeaderFieldKey(i);
+				String headerValue = conn.getHeaderField(i);
+				if (headerName == null && headerValue == null) {
+					break;
+				}
+				msgResponse.put(headerName == null ? "Method" : headerName, headerValue);
+			}
+
+			System.out.println(msgResponse);
+		}
+	}
+
+	@RequestMapping(value = "/testNTLMConnection2", method = RequestMethod.GET)
+	@ResponseBody
+	public void testNTLMConnection2(@RequestParam(value = "serviceUrl") String serviceUrl) throws Exception {
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		credsProvider.setCredentials(AuthScope.ANY,
+				new NTCredentials("jk", "raedu123", null, "rajyj.edu.cn"));
+
+		PoolingHttpClientConnectionManager connPool = new PoolingHttpClientConnectionManager();
+		connPool.setMaxTotal(4000);
+		connPool.setDefaultMaxPerRoute(4000);
+		RequestConfig config = RequestConfig.custom().setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM)).build();
+		CloseableHttpClient client = HttpClients.custom().setConnectionManager(connPool).setDefaultRequestConfig(config).build();
+
+		HttpClientContext context = HttpClientContext.create();
+		context.setCredentialsProvider(credsProvider);
+
+		// Execute a cheap method first. This will trigger NTLM authentication
+		HttpGet httpget = new HttpGet(serviceUrl);
+		CloseableHttpResponse response1 = client.execute(httpget, context);
+		try {
+			HttpEntity entity1 = response1.getEntity();
+			System.out.println(entity1.toString());
+			InputStream content = entity1.getContent();
+			byte[] byteArr = new byte[content.available()];
+			content.read(byteArr);
+			String str = new String(byteArr);
+			System.out.println(str);
+		} finally {
+			response1.close();
+		}
+	}
+
 
 	/**
 	 * ISV获取企业访问凭证

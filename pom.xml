@@ -59,6 +59,12 @@
 			<version>4.3.5</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
@@ -68,7 +74,7 @@
 			<artifactId>top-api-sdk-dev</artifactId>
 			<version>dingtalk-SNAPSHOT</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/lib/taobao-sdk-java-auto_1479188381469-20180525.jar</systemPath>
+			<systemPath>${pom.basedir}/lib/taobao-sdk-java-auto_1479188381469-20200809.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.taobao.top</groupId>
@@ -77,10 +83,60 @@
 			<scope>system</scope>
 			<systemPath>${pom.basedir}/lib/lippi-oapi-encrpt.jar</systemPath>
 		</dependency>
+
+		<dependency>
+			<groupId>com.seewo</groupId>
+			<artifactId>open-sdk-java</artifactId>
+			<version>2.0.2</version>
+			<scope>system</scope>
+			<systemPath>${pom.basedir}/lib/openplatform-web%2Fopen-sdk-java-2.0.2.jar</systemPath>
+		</dependency>
+
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
 			<version>1.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-all</artifactId>
+			<version>5.3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>4.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.biezhi</groupId>
+			<artifactId>TinyPinyin</artifactId>
+			<version>2.0.3.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.olingo</groupId>
+			<artifactId>olingo-odata2-api</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.olingo</groupId>
+			<artifactId>olingo-odata2-core</artifactId>
+			<version>2.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.ws.rs</groupId>
+					<artifactId>javax.ws.rs-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.48</version>
+		</dependency>
+		<dependency>
+			<groupId>jcifs</groupId>
+			<artifactId>jcifs</artifactId>
+			<version>1.3.17</version>
 		</dependency>
 
 	</dependencies>
